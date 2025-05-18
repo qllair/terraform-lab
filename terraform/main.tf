@@ -63,6 +63,27 @@ attributes = [
 ]
 }
 
+resource "aws_iam_role_policy" "lambda_logging" {
+  name = "lambda-logging"
+  role = aws_iam_role.lambda_exec.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+
 resource "aws_iam_role" "lambda_exec" {
   name = "lambda-exec-role"
 
@@ -110,6 +131,7 @@ module "get_all_authors_lambda" {
     TABLE_NAME = module.authors_table.table_name
     REGION     = "eu-central-1"
   }
+  lambda_role_name = aws_iam_role.lambda_exec.name
 }
 
 
@@ -124,6 +146,7 @@ module "get_all_courses_lambda" {
     TABLE_NAME = module.courses_table.table_name
     REGION     = "eu-central-1"
   }
+  lambda_role_name = aws_iam_role.lambda_exec.name
 }
 
 module "get_course_lambda" {
@@ -137,6 +160,7 @@ module "get_course_lambda" {
     TABLE_NAME = module.courses_table.table_name
     REGION     = "eu-central-1"
   }
+  lambda_role_name = aws_iam_role.lambda_exec.name
 }
 
 module "save_course_lambda" {
@@ -150,6 +174,7 @@ module "save_course_lambda" {
     TABLE_NAME = module.courses_table.table_name
     REGION     = "eu-central-1"
   }
+  lambda_role_name = aws_iam_role.lambda_exec.name
 }
 
 module "update_course_lambda" {
@@ -163,6 +188,7 @@ module "update_course_lambda" {
     TABLE_NAME = module.courses_table.table_name
     REGION     = "eu-central-1"
   }
+  lambda_role_name = aws_iam_role.lambda_exec.name
 }
 
 module "delete_course_lambda" {
@@ -176,4 +202,19 @@ module "delete_course_lambda" {
     TABLE_NAME = module.courses_table.table_name
     REGION     = "eu-central-1"
   }
+  lambda_role_name = aws_iam_role.lambda_exec.name
+}
+
+module "api_gateway" {
+  source = "./modules/apigateway"
+
+  name                         = "course-api"
+  stage_name                   = "dev"
+  get_all_courses_lambda_arn   = module.get_all_courses_lambda.lambda_arn
+  get_course_lambda_arn        = module.get_course_lambda.lambda_arn
+  save_course_lambda_arn       = module.save_course_lambda.lambda_arn
+  update_course_lambda_arn     = module.update_course_lambda.lambda_arn
+  delete_course_lambda_arn     = module.delete_course_lambda.lambda_arn
+  get_all_authors_lambda_arn   = module.get_all_authors_lambda.lambda_arn
+  region = "eu-central-1"
 }

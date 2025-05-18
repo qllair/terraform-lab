@@ -1,4 +1,3 @@
-console.log("Lambda started");
 const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB();
 
@@ -10,7 +9,7 @@ exports.handler = async (event) => {
   };
   try {
     await dynamodb.putItem(params).promise();
-    return { statusCode: 200, body: JSON.stringify({ message: "Course updated" }) };
+    return { statusCode: 200, body: JSON.stringify({ message: "Course saved" }) };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }

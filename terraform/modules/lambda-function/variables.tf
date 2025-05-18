@@ -21,3 +21,8 @@ variable "source_path" {
 variable "environment_variables" {
   type = map(string)
 }
+
+variable "lambda_role_name" {
+  description = "IAM role name for Lambda"
+  type        = string
+}
