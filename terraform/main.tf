@@ -62,3 +62,118 @@ attributes = [
   }
 ]
 }
+
+resource "aws_iam_role" "lambda_exec" {
+  name = "lambda-exec-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_dynamodb_policy" {
+  name = "lambda-dynamodb-read-authors"
+  role = aws_iam_role.lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "dynamodb:Scan",
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = module.authors_table.table_arn
+      }
+    ]
+  })
+}
+
+module "get_all_authors_lambda" {
+  source              = "./modules/lambda-function"
+  function_name       = "get-all-authors"
+  handler             = "index.handler"
+  runtime             = "nodejs18.x"
+  role_arn            = aws_iam_role.lambda_exec.arn
+  source_path         = abspath("${path.root}/lambda/get-all-authors")
+  environment_variables = {
+    TABLE_NAME = module.authors_table.table_name
+    REGION     = "eu-central-1"
+  }
+}
+
+
+module "get_all_courses_lambda" {
+  source              = "./modules/lambda-function"
+  function_name       = "get-all-courses"
+  handler             = "index.handler"
+  runtime             = "nodejs18.x"
+  role_arn            = aws_iam_role.lambda_exec.arn
+  source_path         = abspath("${path.root}/lambda/get-all-courses")
+  environment_variables = {
+    TABLE_NAME = module.courses_table.table_name
+    REGION     = "eu-central-1"
+  }
+}
+
+module "get_course_lambda" {
+  source              = "./modules/lambda-function"
+  function_name       = "get-course"
+  handler             = "index.handler"
+  runtime             = "nodejs18.x"
+  role_arn            = aws_iam_role.lambda_exec.arn
+  source_path         = abspath("${path.root}/lambda/get-course")
+  environment_variables = {
+    TABLE_NAME = module.courses_table.table_name
+    REGION     = "eu-central-1"
+  }
+}
+
+module "save_course_lambda" {
+  source              = "./modules/lambda-function"
+  function_name       = "save-course"
+  handler             = "index.handler"
+  runtime             = "nodejs18.x"
+  role_arn            = aws_iam_role.lambda_exec.arn
+  source_path         = abspath("${path.root}/lambda/save-course")
+  environment_variables = {
+    TABLE_NAME = module.courses_table.table_name
+    REGION     = "eu-central-1"
+  }
+}
+
+module "update_course_lambda" {
+  source              = "./modules/lambda-function"
+  function_name       = "update-course"
+  handler             = "index.handler"
+  runtime             = "nodejs18.x"
+  role_arn            = aws_iam_role.lambda_exec.arn
+  source_path         = abspath("${path.root}/lambda/update-course")
+  environment_variables = {
+    TABLE_NAME = module.courses_table.table_name
+    REGION     = "eu-central-1"
+  }
+}
+
+module "delete_course_lambda" {
+  source              = "./modules/lambda-function"
+  function_name       = "delete-course"
+  handler             = "index.handler"
+  runtime             = "nodejs18.x"
+  role_arn            = aws_iam_role.lambda_exec.arn
+  source_path         = abspath("${path.root}/lambda/delete-course")
+  environment_variables = {
+    TABLE_NAME = module.courses_table.table_name
+    REGION     = "eu-central-1"
+  }
+}
