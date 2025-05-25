@@ -42,18 +42,8 @@ resource "aws_api_gateway_integration" "authors_get" {
   resource_id             = aws_api_gateway_resource.authors.id
   http_method             = aws_api_gateway_method.authors_get.http_method
   integration_http_method = "POST"
-  type                    = "AWS"
+  type                    = "AWS_PROXY"
   uri                     = module.lambda_functions.lambda_get_all_authors_invoke_arn
-
-  request_templates = {
-    "application/json" = <<EOF
-{
-  "body": $input.json('$')
-}
-EOF
-  }
-
-  content_handling = "CONVERT_TO_TEXT"
 }
 
 resource "aws_api_gateway_integration" "authors_options" {
@@ -118,20 +108,19 @@ resource "aws_api_gateway_integration" "courses_get" {
   resource_id             = aws_api_gateway_resource.courses.id
   http_method             = aws_api_gateway_method.courses_get.http_method
   integration_http_method = "POST"
-  type                    = "AWS"
+  type                    = "AWS_PROXY"
   uri                     = module.lambda_functions.lambda_get_all_courses_invoke_arn
-
-  request_templates = {
-    "application/json" = "{ \"statusCode\": 200 }"
-  }
-  content_handling = "CONVERT_TO_TEXT"
 }
 
 resource "aws_api_gateway_method" "courses_post" {
-  rest_api_id   = aws_api_gateway_rest_api.this.id
-  resource_id   = aws_api_gateway_resource.courses.id
-  http_method   = "POST"
-  authorization = "NONE"
+  rest_api_id          = aws_api_gateway_rest_api.this.id
+  resource_id          = aws_api_gateway_resource.courses.id
+  http_method          = "POST"
+  authorization        = "NONE"
+  request_validator_id = aws_api_gateway_request_validator.body_only.id
+  request_models = {
+    "application/json" = aws_api_gateway_model.post_course.name
+  }
 }
 
 resource "aws_api_gateway_integration" "courses_post" {
@@ -139,20 +128,40 @@ resource "aws_api_gateway_integration" "courses_post" {
   resource_id             = aws_api_gateway_resource.courses.id
   http_method             = aws_api_gateway_method.courses_post.http_method
   integration_http_method = "POST"
-  type                    = "AWS"
+  type                    = "AWS_PROXY"
   uri                     = module.lambda_functions.lambda_save_course_invoke_arn
-  request_templates = {
-    "application/json" = <<EOF
+
+}
+
+
+resource "aws_api_gateway_model" "post_course" {
+  rest_api_id  = aws_api_gateway_rest_api.this.id
+  name         = "PostCourseModel"
+  description  = "Course input model"
+  content_type = "application/json"
+
+  schema = <<EOF
 {
-  "title": "$input.json('$.title')",
-  "authorId": "$input.json('$.authorId')",
-  "length": "$input.json('$.length')",
-  "category": "$input.json('$.category')"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Course",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "authorId": { "type": "string" },
+    "length": { "type": "string" },
+    "category": { "type": "string" }
+  },
+  "required": ["title", "authorId", "length", "category"]
 }
 EOF
-  }
-  content_handling = "CONVERT_TO_TEXT"
 }
+
+resource "aws_api_gateway_request_validator" "body_only" {
+  rest_api_id           = aws_api_gateway_rest_api.this.id
+  name                  = "BodyOnlyValidator"
+  validate_request_body = true
+}
+
 resource "aws_api_gateway_method" "courses_options" {
   rest_api_id   = aws_api_gateway_rest_api.this.id
   resource_id   = aws_api_gateway_resource.courses.id
@@ -223,15 +232,8 @@ resource "aws_api_gateway_integration" "courses_id_get" {
   resource_id             = aws_api_gateway_resource.courses_id.id
   http_method             = aws_api_gateway_method.courses_id_get.http_method
   integration_http_method = "POST"
-  type                    = "AWS"
+  type                    = "AWS_PROXY"
   uri                     = module.lambda_functions.lambda_get_course_invoke_arn
-  request_templates = {
-    "application/json" = <<EOF
-{
-  "id": "$input.params('id')"
-}
-EOF
-  }
 }
 
 
@@ -250,20 +252,9 @@ resource "aws_api_gateway_integration" "courses_id_put" {
   resource_id             = aws_api_gateway_resource.courses_id.id
   http_method             = aws_api_gateway_method.courses_id_put.http_method
   integration_http_method = "POST"
-  type                    = "AWS"
+  type                    = "AWS_PROXY"
   uri                     = module.lambda_functions.lambda_update_course_invoke_arn
-  request_templates = {
-    "application/json" = <<EOF
-{
-  "id": "$input.params('id')",
-  "title": "$input.json('$.title')",
-  "authorId": "$input.json('$.authorId')",
-  "length": "$input.json('$.length')",
-  "category": "$input.json('$.category')",
-  "watchHref": "$input.json('$.watchHref')"
-}
-EOF
-  }
+
 }
 
 resource "aws_api_gateway_method" "courses_id_delete" {
@@ -281,15 +272,8 @@ resource "aws_api_gateway_integration" "courses_id_delete" {
   resource_id             = aws_api_gateway_resource.courses_id.id
   http_method             = aws_api_gateway_method.courses_id_delete.http_method
   integration_http_method = "POST"
-  type                    = "AWS"
+  type                    = "AWS_PROXY"
   uri                     = module.lambda_functions.lambda_delete_course_invoke_arn
-  request_templates = {
-    "application/json" = <<EOF
-{
-  "id": "$input.params('id')"
-}
-EOF
-  }
 }
 
 resource "aws_api_gateway_method" "course_id_options" {

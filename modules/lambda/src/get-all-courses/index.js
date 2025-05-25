@@ -1,5 +1,5 @@
-const AWS5 = require("aws-sdk");
-const dynamodb5 = new AWS5.DynamoDB.DocumentClient();
+const AWS = require("aws-sdk");
+const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async () => {
   const params = {
@@ -7,7 +7,7 @@ exports.handler = async () => {
   };
 
   try {
-    const data = await dynamodb5.scan(params).promise();
+    const data = await dynamodb.scan(params).promise();
     return {
       statusCode: 200,
       body: JSON.stringify(data.Items)

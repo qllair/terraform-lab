@@ -1,22 +1,26 @@
-const AWS3 = require("aws-sdk");
-const dynamodb3 = new AWS3.DynamoDB.DocumentClient();
+const AWS = require("aws-sdk");
+const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
+  const id = event.pathParameters.id;
+
   const params = {
     TableName: process.env.TABLE_NAME,
-    Key: { id: event.id }
+    Key: { id }
   };
 
   try {
-    await dynamodb3.delete(params).promise();
+    await dynamodb.delete(params).promise();
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: `Course with id '${event.id}' deleted.` })
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ message: "Course deleted", id })
     };
   } catch (err) {
-    console.error("DeleteItem error:", err);
+    console.error(err);
     return {
       statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ error: err.message })
     };
   }

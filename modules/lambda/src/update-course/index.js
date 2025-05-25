@@ -1,14 +1,17 @@
-const AWS4 = require("aws-sdk");
-const dynamodb4 = new AWS4.DynamoDB.DocumentClient();
+const AWS = require("aws-sdk");
+const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
+  const id = event.pathParameters.id;
+  const body = JSON.parse(event.body);
+
   const item = {
-    id: event.id,
-    title: event.title,
-    watchHref: event.watchHref,
-    authorId: event.authorId,
-    length: event.length,
-    category: event.category
+    id,
+    title: body.title,
+    watchHref: body.watchHref,
+    authorId: body.authorId,
+    length: body.length,
+    category: body.category
   };
 
   const params = {
@@ -17,15 +20,17 @@ exports.handler = async (event) => {
   };
 
   try {
-    await dynamodb4.put(params).promise();
+    await dynamodb.put(params).promise();
     return {
       statusCode: 200,
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify(item)
     };
   } catch (err) {
-    console.error("PutItem error:", err);
+    console.error(err);
     return {
       statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ error: err.message })
     };
   }
