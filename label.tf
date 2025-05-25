@@ -6,5 +6,5 @@ module "label" {
   stage      = "dev"
   name       = "aws-lab"
   attributes = []
-  context = var.context
+  context    = var.context
 }
