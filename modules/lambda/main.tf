@@ -35,7 +35,15 @@ module "lambda_get_all_authors" {
     }
   }
 
-  tags = module.label.tags
+  allowed_triggers = {
+    APIGatewayAny = {
+      service    = "apigateway"
+      source_arn = "${var.aws_api_gateway_rest_api_execution_arn}/*/*/*"
+    }
+  }
+  publish                                 = true
+  create_current_version_allowed_triggers = false
+  tags                                    = module.label.tags
 }
 
 # --- get-all-courses
@@ -68,7 +76,15 @@ module "lambda_get_all_courses" {
     }
   }
 
-  tags = module.label.tags
+  allowed_triggers = {
+    APIGatewayAny = {
+      service    = "apigateway"
+      source_arn = "${var.aws_api_gateway_rest_api_execution_arn}/*/*/*"
+    }
+  }
+  publish                                 = true
+  create_current_version_allowed_triggers = false
+  tags                                    = module.label.tags
 }
 
 # --- get-course
@@ -101,7 +117,15 @@ module "lambda_get_course" {
     }
   }
 
-  tags = module.label.tags
+  allowed_triggers = {
+    APIGatewayAny = {
+      service    = "apigateway"
+      source_arn = "${var.aws_api_gateway_rest_api_execution_arn}/*/*/*"
+    }
+  }
+  publish                                 = true
+  create_current_version_allowed_triggers = false
+  tags                                    = module.label.tags
 }
 
 # --- save-course
@@ -134,7 +158,15 @@ module "lambda_save_course" {
     }
   }
 
-  tags = module.label.tags
+  allowed_triggers = {
+    APIGatewayAny = {
+      service    = "apigateway"
+      source_arn = "${var.aws_api_gateway_rest_api_execution_arn}/*/*/*"
+    }
+  }
+  publish                                 = true
+  create_current_version_allowed_triggers = false
+  tags                                    = module.label.tags
 }
 
 # --- update-course
@@ -167,7 +199,15 @@ module "lambda_update_course" {
     }
   }
 
-  tags = module.label.tags
+  allowed_triggers = {
+    APIGatewayAny = {
+      service    = "apigateway"
+      source_arn = "${var.aws_api_gateway_rest_api_execution_arn}/*/*/*"
+    }
+  }
+  publish                                 = true
+  create_current_version_allowed_triggers = false
+  tags                                    = module.label.tags
 }
 
 # --- delete-course
@@ -200,5 +240,13 @@ module "lambda_delete_course" {
     }
   }
 
-  tags = module.label.tags
+  allowed_triggers = {
+    APIGatewayAny = {
+      service    = "apigateway"
+      source_arn = "${var.aws_api_gateway_rest_api_execution_arn}/*/*/*"
+    }
+  }
+  publish                                 = true
+  create_current_version_allowed_triggers = false
+  tags                                    = module.label.tags
 }
