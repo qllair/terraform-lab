@@ -153,6 +153,50 @@ EOF
   }
   content_handling = "CONVERT_TO_TEXT"
 }
+resource "aws_api_gateway_method" "courses_options" {
+  rest_api_id   = aws_api_gateway_rest_api.this.id
+  resource_id   = aws_api_gateway_resource.courses.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "courses_options" {
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  resource_id = aws_api_gateway_resource.courses.id
+  http_method = aws_api_gateway_method.courses_options.http_method
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+resource "aws_api_gateway_method_response" "courses_options" {
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  resource_id = aws_api_gateway_resource.courses.id
+  http_method = aws_api_gateway_method.courses_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "courses_options" {
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  resource_id = aws_api_gateway_resource.courses.id
+  http_method = aws_api_gateway_method.courses_options.http_method
+  status_code = aws_api_gateway_method_response.courses_options.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS,PUT,DELETE'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+}
+
 
 ###################
 # /courses/{id}   #
@@ -164,7 +208,6 @@ resource "aws_api_gateway_resource" "courses_id" {
 }
 
 
-# GET /courses/{id}
 resource "aws_api_gateway_method" "courses_id_get" {
   rest_api_id   = aws_api_gateway_rest_api.this.id
   resource_id   = aws_api_gateway_resource.courses_id.id
@@ -191,7 +234,7 @@ EOF
   }
 }
 
-# PUT /courses/{id}
+
 resource "aws_api_gateway_method" "courses_id_put" {
   rest_api_id   = aws_api_gateway_rest_api.this.id
   resource_id   = aws_api_gateway_resource.courses_id.id
@@ -223,7 +266,6 @@ EOF
   }
 }
 
-# DELETE /courses/{id}
 resource "aws_api_gateway_method" "courses_id_delete" {
   rest_api_id   = aws_api_gateway_rest_api.this.id
   resource_id   = aws_api_gateway_resource.courses_id.id
@@ -297,10 +339,6 @@ resource "aws_api_gateway_integration_response" "course_id_options" {
   }
 }
 
-
-###################
-# Deployment      #
-###################
 resource "aws_api_gateway_deployment" "this" {
   depends_on = [
     aws_api_gateway_integration.courses_get,
