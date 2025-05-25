@@ -7,15 +7,23 @@ exports.handler = async () => {
   };
 
   try {
-    const data = await dynamodb.scan(params).promise();
+    const result = await dynamodb.scan(params).promise();
+
     return {
       statusCode: 200,
-      body: JSON.stringify(data.Items)
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type"
+      },
+      body: JSON.stringify(result.Items || {})
     };
   } catch (err) {
-    console.error("Scan error:", err);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type"
+      },
       body: JSON.stringify({ error: err.message })
     };
   }
